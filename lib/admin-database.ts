@@ -77,22 +77,39 @@ export interface AdminAgenda {
   created_at: string
 }
 
+export interface AdminVillageOfficial {
+  id: number
+  name: string
+  position: string
+  photo?: string
+  phone?: string
+  email?: string
+  description?: string
+  order_index: number
+  created_at: string
+}
+
 // Auth functions
 export async function authenticateAdmin(email: string, password: string): Promise<AdminUser | null> {
   try {
-    const users = await sql`
-      SELECT id, email, name, role, created_at 
-      FROM admin_users 
-      WHERE email = ${email} AND password = ${password}
-    `
-    return users[0] || null
+    // For demo purposes - in production, use proper password hashing
+    if (email === "admin@desakaliwungu.id" && password === "admin123") {
+      return {
+        id: 1,
+        email: "admin@desakaliwungu.id",
+        name: "Administrator Desa",
+        role: "admin",
+        created_at: new Date().toISOString(),
+      }
+    }
+    return null
   } catch (error) {
     console.error("Authentication error:", error)
     return null
   }
 }
 
-// News functions - THESE ARE THE MAIN NEWS FUNCTIONS FOR THE WEBSITE
+// News functions
 export async function getAllAdminNews(): Promise<AdminNews[]> {
   try {
     const news = await sql`
@@ -178,7 +195,7 @@ export async function deleteAdminNews(id: number): Promise<boolean> {
   }
 }
 
-// UMKM functions - THESE ARE THE MAIN UMKM FUNCTIONS FOR THE WEBSITE
+// UMKM functions
 export async function getAllAdminUMKM(): Promise<AdminUMKM[]> {
   try {
     const umkm = await sql`
@@ -255,7 +272,7 @@ export async function deleteAdminUMKM(id: number): Promise<boolean> {
   }
 }
 
-// Village Profile functions - THESE ARE THE MAIN PROFILE FUNCTIONS FOR THE WEBSITE
+// Village Profile functions
 export async function getAdminVillageProfile(): Promise<AdminVillageProfile | null> {
   try {
     const profile = await sql`
@@ -416,6 +433,70 @@ export async function deleteAdminAgenda(id: number): Promise<boolean> {
   } catch (error) {
     console.error("Error deleting admin agenda:", error)
     throw new Error("Failed to delete agenda")
+  }
+}
+
+// Village Officials functions
+export async function getAllAdminVillageOfficials(): Promise<AdminVillageOfficial[]> {
+  try {
+    const officials = await sql`
+      SELECT * FROM admin_village_officials 
+      ORDER BY order_index ASC, created_at ASC
+    `
+    return officials as AdminVillageOfficial[]
+  } catch (error) {
+    console.error("Error fetching admin village officials:", error)
+    throw new Error("Failed to fetch village officials")
+  }
+}
+
+export async function createAdminVillageOfficial(
+  data: Omit<AdminVillageOfficial, "id" | "created_at">,
+): Promise<AdminVillageOfficial> {
+  try {
+    const result = await sql`
+      INSERT INTO admin_village_officials (name, position, photo, phone, email, description, order_index)
+      VALUES (${data.name}, ${data.position}, ${data.photo || ""}, ${data.phone || ""}, ${data.email || ""}, ${data.description || ""}, ${data.order_index})
+      RETURNING *
+    `
+    return result[0] as AdminVillageOfficial
+  } catch (error) {
+    console.error("Error creating admin village official:", error)
+    throw new Error("Failed to create village official")
+  }
+}
+
+export async function updateAdminVillageOfficial(
+  id: number,
+  data: Partial<AdminVillageOfficial>,
+): Promise<AdminVillageOfficial> {
+  try {
+    const result = await sql`
+      UPDATE admin_village_officials 
+      SET name = COALESCE(${data.name}, name),
+          position = COALESCE(${data.position}, position),
+          photo = COALESCE(${data.photo}, photo),
+          phone = COALESCE(${data.phone}, phone),
+          email = COALESCE(${data.email}, email),
+          description = COALESCE(${data.description}, description),
+          order_index = COALESCE(${data.order_index}, order_index)
+      WHERE id = ${id}
+      RETURNING *
+    `
+    return result[0] as AdminVillageOfficial
+  } catch (error) {
+    console.error("Error updating admin village official:", error)
+    throw new Error("Failed to update village official")
+  }
+}
+
+export async function deleteAdminVillageOfficial(id: number): Promise<boolean> {
+  try {
+    await sql`DELETE FROM admin_village_officials WHERE id = ${id}`
+    return true
+  } catch (error) {
+    console.error("Error deleting admin village official:", error)
+    throw new Error("Failed to delete village official")
   }
 }
 

@@ -8,8 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { FileText, Users, Building, Calendar, Plus, Edit, Trash2, Save, Loader2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FileText, Building, Calendar, Plus, Edit, Trash2, Save, Loader2, ImageIcon, MapPin } from "lucide-react"
+import { NewsForm } from "@/components/admin/news-form"
+import { UMKMForm } from "@/components/admin/umkm-form"
+import { GalleryUpload } from "@/components/admin/gallery-upload"
+import { useToast } from "@/hooks/use-toast"
 import type { FormEvent } from "react"
 
 interface User {
@@ -25,6 +29,7 @@ interface NewsItem {
   content: string
   excerpt?: string
   category: string
+  image?: string
   published: boolean
   created_at: string
 }
@@ -37,6 +42,7 @@ interface UMKMItem {
   owner?: string
   phone?: string
   address?: string
+  image?: string
   featured: boolean
 }
 
@@ -51,6 +57,27 @@ interface VillageProfile {
   rt_count?: number
 }
 
+interface GalleryItem {
+  id: number
+  title: string
+  description?: string
+  image: string
+  category: string
+  created_at: string
+}
+
+interface AgendaItem {
+  id: number
+  title: string
+  description?: string
+  event_date: string
+  event_time?: string
+  location?: string
+  organizer?: string
+  category: string
+  created_at: string
+}
+
 interface Statistics {
   news: number
   umkm: number
@@ -63,18 +90,35 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [loginForm, setLoginForm] = useState({ email: "", password: "" })
   const [loginLoading, setLoginLoading] = useState(false)
+  const { toast } = useToast()
 
   // Data states
   const [news, setNews] = useState<NewsItem[]>([])
   const [umkm, setUmkm] = useState<UMKMItem[]>([])
   const [profile, setProfile] = useState<VillageProfile>({})
+  const [gallery, setGallery] = useState<GalleryItem[]>([])
+  const [agenda, setAgenda] = useState<AgendaItem[]>([])
   const [statistics, setStatistics] = useState<Statistics>({ news: 0, umkm: 0, gallery: 0, agenda: 0 })
 
   // Form states
   const [showNewsForm, setShowNewsForm] = useState(false)
   const [showUMKMForm, setShowUMKMForm] = useState(false)
+  const [showGalleryForm, setShowGalleryForm] = useState(false)
+  const [showAgendaForm, setShowAgendaForm] = useState(false)
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null)
   const [editingUMKM, setEditingUMKM] = useState<UMKMItem | null>(null)
+  const [editingAgenda, setEditingAgenda] = useState<AgendaItem | null>(null)
+
+  // Agenda form state
+  const [agendaForm, setAgendaForm] = useState({
+    title: "",
+    description: "",
+    event_date: "",
+    event_time: "",
+    location: "",
+    organizer: "",
+    category: "Kegiatan Desa",
+  })
 
   useEffect(() => {
     checkAuth()
@@ -129,6 +173,20 @@ export default function AdminDashboard() {
         const profileData = await profileResponse.json()
         setProfile(profileData || {})
       }
+
+      // Load gallery
+      const galleryResponse = await fetch("/api/admin/gallery")
+      if (galleryResponse.ok) {
+        const galleryData = await galleryResponse.json()
+        setGallery(galleryData)
+      }
+
+      // Load agenda
+      const agendaResponse = await fetch("/api/admin/agenda")
+      if (agendaResponse.ok) {
+        const agendaData = await agendaResponse.json()
+        setAgenda(agendaData)
+      }
     } catch (error) {
       console.error("Error loading data:", error)
     }
@@ -150,12 +208,23 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
-        alert("Login berhasil!")
+        toast({
+          title: "Login berhasil!",
+          description: "Selamat datang di admin panel",
+        })
       } else {
-        alert("Email atau password salah!")
+        toast({
+          title: "Login gagal",
+          description: "Email atau password salah",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      alert("Terjadi kesalahan saat login")
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat login",
+        variant: "destructive",
+      })
     } finally {
       setLoginLoading(false)
     }
@@ -165,7 +234,10 @@ export default function AdminDashboard() {
     try {
       await fetch("/api/admin/auth", { method: "DELETE" })
       setUser(null)
-      alert("Logout berhasil!")
+      toast({
+        title: "Logout berhasil",
+        description: "Anda telah keluar dari admin panel",
+      })
     } catch (error) {
       console.error("Logout error:", error)
     }
@@ -184,7 +256,10 @@ export default function AdminDashboard() {
         if (response.ok) {
           const updatedNews = await response.json()
           setNews(news.map((item) => (item.id === editingNews.id ? updatedNews : item)))
-          alert("Berita berhasil diupdate")
+          toast({
+            title: "Berhasil",
+            description: "Berita berhasil diupdate",
+          })
         }
       } else {
         // Add new news
@@ -196,7 +271,10 @@ export default function AdminDashboard() {
         if (response.ok) {
           const newNews = await response.json()
           setNews([newNews, ...news])
-          alert("Berita berhasil ditambahkan")
+          toast({
+            title: "Berhasil",
+            description: "Berita berhasil ditambahkan",
+          })
         }
       }
 
@@ -204,7 +282,11 @@ export default function AdminDashboard() {
       setEditingNews(null)
       loadData() // Refresh statistics
     } catch (error) {
-      alert("Gagal menyimpan berita")
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan berita",
+        variant: "destructive",
+      })
     }
   }
 
@@ -216,11 +298,18 @@ export default function AdminDashboard() {
         })
         if (response.ok) {
           setNews(news.filter((item) => item.id !== id))
-          alert("Berita berhasil dihapus")
+          toast({
+            title: "Berhasil",
+            description: "Berita berhasil dihapus",
+          })
           loadData() // Refresh statistics
         }
       } catch (error) {
-        alert("Gagal menghapus berita")
+        toast({
+          title: "Error",
+          description: "Gagal menghapus berita",
+          variant: "destructive",
+        })
       }
     }
   }
@@ -238,7 +327,10 @@ export default function AdminDashboard() {
         if (response.ok) {
           const updatedUMKM = await response.json()
           setUmkm(umkm.map((item) => (item.id === editingUMKM.id ? updatedUMKM : item)))
-          alert("UMKM berhasil diupdate")
+          toast({
+            title: "Berhasil",
+            description: "UMKM berhasil diupdate",
+          })
         }
       } else {
         // Add new UMKM
@@ -250,7 +342,10 @@ export default function AdminDashboard() {
         if (response.ok) {
           const newUMKM = await response.json()
           setUmkm([newUMKM, ...umkm])
-          alert("UMKM berhasil ditambahkan")
+          toast({
+            title: "Berhasil",
+            description: "UMKM berhasil ditambahkan",
+          })
         }
       }
 
@@ -258,7 +353,11 @@ export default function AdminDashboard() {
       setEditingUMKM(null)
       loadData() // Refresh statistics
     } catch (error) {
-      alert("Gagal menyimpan UMKM")
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan UMKM",
+        variant: "destructive",
+      })
     }
   }
 
@@ -270,11 +369,150 @@ export default function AdminDashboard() {
         })
         if (response.ok) {
           setUmkm(umkm.filter((item) => item.id !== id))
-          alert("UMKM berhasil dihapus")
+          toast({
+            title: "Berhasil",
+            description: "UMKM berhasil dihapus",
+          })
           loadData() // Refresh statistics
         }
       } catch (error) {
-        alert("Gagal menghapus UMKM")
+        toast({
+          title: "Error",
+          description: "Gagal menghapus UMKM",
+          variant: "destructive",
+        })
+      }
+    }
+  }
+
+  // Gallery functions
+  const handleSaveGallery = async (galleryData: Omit<GalleryItem, "id" | "created_at">) => {
+    try {
+      const response = await fetch("/api/admin/gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(galleryData),
+      })
+      if (response.ok) {
+        const newGallery = await response.json()
+        setGallery([newGallery, ...gallery])
+        toast({
+          title: "Berhasil",
+          description: "Foto berhasil ditambahkan ke galeri",
+        })
+        setShowGalleryForm(false)
+        loadData() // Refresh statistics
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menambahkan foto ke galeri",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteGallery = async (id: number) => {
+    if (confirm("Apakah Anda yakin ingin menghapus foto ini?")) {
+      try {
+        const response = await fetch(`/api/admin/gallery/${id}`, {
+          method: "DELETE",
+        })
+        if (response.ok) {
+          setGallery(gallery.filter((item) => item.id !== id))
+          toast({
+            title: "Berhasil",
+            description: "Foto berhasil dihapus",
+          })
+          loadData() // Refresh statistics
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Gagal menghapus foto",
+          variant: "destructive",
+        })
+      }
+    }
+  }
+
+  // Agenda functions
+  const handleSaveAgenda = async (e: FormEvent) => {
+    e.preventDefault()
+    try {
+      if (editingAgenda) {
+        // Update existing agenda
+        const response = await fetch(`/api/admin/agenda/${editingAgenda.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(agendaForm),
+        })
+        if (response.ok) {
+          const updatedAgenda = await response.json()
+          setAgenda(agenda.map((item) => (item.id === editingAgenda.id ? updatedAgenda : item)))
+          toast({
+            title: "Berhasil",
+            description: "Agenda berhasil diupdate",
+          })
+        }
+      } else {
+        // Add new agenda
+        const response = await fetch("/api/admin/agenda", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(agendaForm),
+        })
+        if (response.ok) {
+          const newAgenda = await response.json()
+          setAgenda([newAgenda, ...agenda])
+          toast({
+            title: "Berhasil",
+            description: "Agenda berhasil ditambahkan",
+          })
+        }
+      }
+
+      setShowAgendaForm(false)
+      setEditingAgenda(null)
+      setAgendaForm({
+        title: "",
+        description: "",
+        event_date: "",
+        event_time: "",
+        location: "",
+        organizer: "",
+        category: "Kegiatan Desa",
+      })
+      loadData() // Refresh statistics
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan agenda",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteAgenda = async (id: number) => {
+    if (confirm("Apakah Anda yakin ingin menghapus agenda ini?")) {
+      try {
+        const response = await fetch(`/api/admin/agenda/${id}`, {
+          method: "DELETE",
+        })
+        if (response.ok) {
+          setAgenda(agenda.filter((item) => item.id !== id))
+          toast({
+            title: "Berhasil",
+            description: "Agenda berhasil dihapus",
+          })
+          loadData() // Refresh statistics
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Gagal menghapus agenda",
+          variant: "destructive",
+        })
       }
     }
   }
@@ -288,10 +526,17 @@ export default function AdminDashboard() {
         body: JSON.stringify(profile),
       })
       if (response.ok) {
-        alert("Profil desa berhasil disimpan")
+        toast({
+          title: "Berhasil",
+          description: "Profil desa berhasil disimpan",
+        })
       }
     } catch (error) {
-      alert("Gagal menyimpan profil desa")
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan profil desa",
+        variant: "destructive",
+      })
     }
   }
 
@@ -363,8 +608,8 @@ export default function AdminDashboard() {
   const stats = [
     { title: "Total Berita", value: statistics.news.toString(), icon: FileText, color: "text-blue-600" },
     { title: "UMKM Terdaftar", value: statistics.umkm.toString(), icon: Building, color: "text-green-600" },
-    { title: "Foto Galeri", value: statistics.gallery.toString(), icon: Calendar, color: "text-purple-600" },
-    { title: "Agenda Kegiatan", value: statistics.agenda.toString(), icon: Users, color: "text-orange-600" },
+    { title: "Foto Galeri", value: statistics.gallery.toString(), icon: ImageIcon, color: "text-purple-600" },
+    { title: "Agenda Kegiatan", value: statistics.agenda.toString(), icon: Calendar, color: "text-orange-600" },
   ]
 
   return (
@@ -372,7 +617,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <header className="bg-white border-b">
         <div className="container flex items-center justify-between h-16">
-          <h1 className="text-xl font-bold">Admin Dashboard - Database Real</h1>
+          <h1 className="text-xl font-bold">Admin Dashboard - Desa Kaliwungu</h1>
           <div className="flex items-center gap-4">
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               🟢 Database Connected
@@ -405,12 +650,13 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="berita">Berita</TabsTrigger>
             <TabsTrigger value="umkm">UMKM</TabsTrigger>
             <TabsTrigger value="profil">Profil</TabsTrigger>
             <TabsTrigger value="galeri">Galeri</TabsTrigger>
+            <TabsTrigger value="agenda">Agenda</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">
@@ -449,7 +695,9 @@ export default function AdminDashboard() {
                       <div key={umkmItem.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <h4 className="font-medium">{umkmItem.name}</h4>
-                          <p className="text-sm text-muted-foreground">{umkmItem.category}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {umkmItem.category} • {umkmItem.owner}
+                          </p>
                         </div>
                         <Badge variant={umkmItem.featured ? "default" : "secondary"}>
                           {umkmItem.featured ? "Unggulan" : "Biasa"}
@@ -476,7 +724,7 @@ export default function AdminDashboard() {
             ) : (
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Kelola Berita (Database Real)</CardTitle>
+                  <CardTitle>Kelola Berita</CardTitle>
                   <Button onClick={() => setShowNewsForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Tambah Berita
@@ -532,7 +780,7 @@ export default function AdminDashboard() {
             ) : (
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Kelola UMKM (Database Real)</CardTitle>
+                  <CardTitle>Kelola UMKM</CardTitle>
                   <Button onClick={() => setShowUMKMForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Tambah UMKM
@@ -578,7 +826,7 @@ export default function AdminDashboard() {
           <TabsContent value="profil">
             <Card>
               <CardHeader>
-                <CardTitle>Kelola Profil Desa (Database Real)</CardTitle>
+                <CardTitle>Kelola Profil Desa</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveProfile} className="space-y-4">
@@ -633,6 +881,40 @@ export default function AdminDashboard() {
                       />
                     </div>
                   </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="villages_count">Jumlah Dusun</Label>
+                      <Input
+                        id="villages_count"
+                        type="number"
+                        placeholder="Jumlah dusun"
+                        value={profile.villages_count || ""}
+                        onChange={(e) =>
+                          setProfile({ ...profile, villages_count: Number.parseInt(e.target.value) || 0 })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rw_count">Jumlah RW</Label>
+                      <Input
+                        id="rw_count"
+                        type="number"
+                        placeholder="Jumlah RW"
+                        value={profile.rw_count || ""}
+                        onChange={(e) => setProfile({ ...profile, rw_count: Number.parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rt_count">Jumlah RT</Label>
+                      <Input
+                        id="rt_count"
+                        type="number"
+                        placeholder="Jumlah RT"
+                        value={profile.rt_count || ""}
+                        onChange={(e) => setProfile({ ...profile, rt_count: Number.parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
                   <Button type="submit">
                     <Save className="h-4 w-4 mr-2" />
                     Simpan Perubahan
@@ -643,249 +925,245 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="galeri">
-            <Card>
-              <CardHeader>
-                <CardTitle>Kelola Galeri (Database Real)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Fitur galeri dengan database real akan segera tersedia.</p>
-              </CardContent>
-            </Card>
+            {showGalleryForm ? (
+              <GalleryUpload onSubmit={handleSaveGallery} onCancel={() => setShowGalleryForm(false)} />
+            ) : (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Kelola Galeri</CardTitle>
+                  <Button onClick={() => setShowGalleryForm(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Upload Foto
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {gallery.map((item) => (
+                      <div key={item.id} className="border rounded-lg overflow-hidden">
+                        <div className="aspect-video bg-muted">
+                          {item.image ? (
+                            <img
+                              src={item.image || "/placeholder.svg"}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <h4 className="font-medium">{item.title}</h4>
+                          <p className="text-sm text-muted-foreground">{item.category}</p>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(item.created_at).toLocaleDateString("id-ID")}
+                            </span>
+                            <Button size="sm" variant="outline" onClick={() => handleDeleteGallery(item.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {gallery.length === 0 && (
+                      <div className="col-span-full text-center py-8">
+                        <p className="text-muted-foreground">Belum ada foto di galeri</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="agenda">
+            {showAgendaForm ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{editingAgenda ? "Edit Agenda" : "Tambah Agenda Baru"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSaveAgenda} className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="agenda-title">Judul Kegiatan *</Label>
+                      <Input
+                        id="agenda-title"
+                        value={agendaForm.title}
+                        onChange={(e) => setAgendaForm({ ...agendaForm, title: e.target.value })}
+                        placeholder="Masukkan judul kegiatan"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="agenda-description">Deskripsi</Label>
+                      <Textarea
+                        id="agenda-description"
+                        value={agendaForm.description}
+                        onChange={(e) => setAgendaForm({ ...agendaForm, description: e.target.value })}
+                        placeholder="Deskripsi kegiatan"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="agenda-date">Tanggal Kegiatan *</Label>
+                        <Input
+                          id="agenda-date"
+                          type="date"
+                          value={agendaForm.event_date}
+                          onChange={(e) => setAgendaForm({ ...agendaForm, event_date: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="agenda-time">Waktu</Label>
+                        <Input
+                          id="agenda-time"
+                          type="time"
+                          value={agendaForm.event_time}
+                          onChange={(e) => setAgendaForm({ ...agendaForm, event_time: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="agenda-location">Lokasi</Label>
+                        <Input
+                          id="agenda-location"
+                          value={agendaForm.location}
+                          onChange={(e) => setAgendaForm({ ...agendaForm, location: e.target.value })}
+                          placeholder="Lokasi kegiatan"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="agenda-organizer">Penyelenggara</Label>
+                        <Input
+                          id="agenda-organizer"
+                          value={agendaForm.organizer}
+                          onChange={(e) => setAgendaForm({ ...agendaForm, organizer: e.target.value })}
+                          placeholder="Penyelenggara kegiatan"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="agenda-category">Kategori</Label>
+                      <Select
+                        value={agendaForm.category}
+                        onValueChange={(value) => setAgendaForm({ ...agendaForm, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih kategori" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Kegiatan Desa">Kegiatan Desa</SelectItem>
+                          <SelectItem value="Rapat">Rapat</SelectItem>
+                          <SelectItem value="Gotong Royong">Gotong Royong</SelectItem>
+                          <SelectItem value="Pelatihan">Pelatihan</SelectItem>
+                          <SelectItem value="Sosial">Sosial</SelectItem>
+                          <SelectItem value="Budaya">Budaya</SelectItem>
+                          <SelectItem value="Olahraga">Olahraga</SelectItem>
+                          <SelectItem value="Lainnya">Lainnya</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <Button type="submit">{editingAgenda ? "Update" : "Simpan"}</Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowAgendaForm(false)
+                          setEditingAgenda(null)
+                          setAgendaForm({
+                            title: "",
+                            description: "",
+                            event_date: "",
+                            event_time: "",
+                            location: "",
+                            organizer: "",
+                            category: "Kegiatan Desa",
+                          })
+                        }}
+                      >
+                        Batal
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Kelola Agenda</CardTitle>
+                  <Button onClick={() => setShowAgendaForm(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Agenda
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {agenda.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{item.title}</h4>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(item.event_date).toLocaleDateString("id-ID")}
+                              {item.event_time && ` • ${item.event_time}`}
+                            </span>
+                            {item.location && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                {item.location}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{item.category}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingAgenda(item)
+                              setAgendaForm({
+                                title: item.title,
+                                description: item.description || "",
+                                event_date: item.event_date,
+                                event_time: item.event_time || "",
+                                location: item.location || "",
+                                organizer: item.organizer || "",
+                                category: item.category,
+                              })
+                              setShowAgendaForm(true)
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleDeleteAgenda(item.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {agenda.length === 0 && <p className="text-muted-foreground text-center py-8">Belum ada agenda</p>}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
     </div>
-  )
-}
-
-// News Form Component
-function NewsForm({
-  initialData,
-  onSubmit,
-  onCancel,
-}: {
-  initialData: NewsItem | null
-  onSubmit: (data: Omit<NewsItem, "id" | "created_at">) => void
-  onCancel: () => void
-}) {
-  const [formData, setFormData] = useState({
-    title: initialData?.title || "",
-    content: initialData?.content || "",
-    excerpt: initialData?.excerpt || "",
-    category: initialData?.category || "Umum",
-    published: initialData?.published || false,
-  })
-
-  const categories = ["Umum", "Pembangunan", "Ekonomi", "Sosial", "Budaya", "Kesehatan", "Pendidikan", "Lingkungan"]
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{initialData ? "Edit Berita" : "Tambah Berita Baru"}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Judul Berita *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Masukkan judul berita"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="excerpt">Ringkasan</Label>
-            <Textarea
-              id="excerpt"
-              value={formData.excerpt}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              placeholder="Ringkasan singkat berita"
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category">Kategori</Label>
-            <select
-              id="category"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full p-2 border rounded-md"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="content">Konten Berita *</Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="Tulis konten berita lengkap di sini"
-              rows={10}
-              required
-            />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="published"
-              checked={formData.published}
-              onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
-            />
-            <Label htmlFor="published">Publikasikan berita</Label>
-          </div>
-
-          <div className="flex gap-4">
-            <Button type="submit">{initialData ? "Update" : "Simpan"}</Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Batal
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  )
-}
-
-// UMKM Form Component
-function UMKMForm({
-  initialData,
-  onSubmit,
-  onCancel,
-}: {
-  initialData: UMKMItem | null
-  onSubmit: (data: Omit<UMKMItem, "id">) => void
-  onCancel: () => void
-}) {
-  const [formData, setFormData] = useState({
-    name: initialData?.name || "",
-    description: initialData?.description || "",
-    category: initialData?.category || "Makanan & Minuman",
-    owner: initialData?.owner || "",
-    phone: initialData?.phone || "",
-    address: initialData?.address || "",
-    featured: initialData?.featured || false,
-  })
-
-  const categories = ["Makanan & Minuman", "Kerajinan", "Fashion", "Pertanian", "Jasa", "Teknologi", "Lainnya"]
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{initialData ? "Edit UMKM" : "Tambah UMKM Baru"}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nama UMKM *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Nama usaha"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="owner">Nama Pemilik</Label>
-              <Input
-                id="owner"
-                value={formData.owner}
-                onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-                placeholder="Nama pemilik usaha"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Deskripsi *</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Deskripsi produk atau layanan"
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Kategori</Label>
-              <select
-                id="category"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full p-2 border rounded-md"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Nomor Telepon</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="08xx-xxxx-xxxx"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">Alamat</Label>
-            <Textarea
-              id="address"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              placeholder="Alamat lengkap usaha"
-              rows={3}
-            />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="featured"
-              checked={formData.featured}
-              onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
-            />
-            <Label htmlFor="featured">Jadikan UMKM unggulan</Label>
-          </div>
-
-          <div className="flex gap-4">
-            <Button type="submit">{initialData ? "Update" : "Simpan"}</Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Batal
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
   )
 }

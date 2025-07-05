@@ -1,6 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getAllGallery, createGalleryItem } from "@/lib/database"
-import { verifyToken } from "@/lib/auth"
+import { NextResponse } from "next/server"
+import { getAllGallery, createAdminGallery } from "@/lib/admin-database"
 
 export async function GET() {
   try {
@@ -12,20 +11,13 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    // Check authentication
-    const token = request.cookies.get("auth-token")?.value
-    if (!token || !verifyToken(token)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const data = await request.json()
-    const gallery = await createGalleryItem(data)
-
+    const gallery = await createAdminGallery(data)
     return NextResponse.json(gallery, { status: 201 })
   } catch (error) {
-    console.error("Error creating gallery item:", error)
-    return NextResponse.json({ error: "Failed to create gallery item" }, { status: 500 })
+    console.error("Error creating gallery:", error)
+    return NextResponse.json({ error: "Failed to create gallery" }, { status: 500 })
   }
 }
