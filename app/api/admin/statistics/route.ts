@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const stats = await getAdminStatistics()
-    return NextResponse.json(stats)
+    const statistics = await getAdminStatistics()
+    return NextResponse.json(statistics)
   } catch (error) {
     console.error("Error fetching statistics:", error)
     return NextResponse.json({ error: "Failed to fetch statistics" }, { status: 500 })

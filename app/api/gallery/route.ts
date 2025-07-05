@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json()
-    const galleryItem = await createGalleryItem(data)
+    const gallery = await createGalleryItem(data)
 
-    return NextResponse.json(galleryItem, { status: 201 })
+    return NextResponse.json(gallery, { status: 201 })
   } catch (error) {
     console.error("Error creating gallery item:", error)
     return NextResponse.json({ error: "Failed to create gallery item" }, { status: 500 })

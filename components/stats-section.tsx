@@ -1,80 +1,124 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Users, GraduationCap, Heart, Briefcase } from "lucide-react"
+"use client"
+
+import { useEffect, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Users, Building } from "lucide-react"
+
+interface Statistics {
+  news: number
+  umkm: number
+  gallery: number
+  agenda: number
+}
+
+interface VillageProfile {
+  population?: number
+  villages_count?: number
+  rw_count?: number
+  rt_count?: number
+}
 
 export function StatsSection() {
-  const stats = [
+  const [stats, setStats] = useState<Statistics>({ news: 0, umkm: 0, gallery: 0, agenda: 0 })
+  const [profile, setProfile] = useState<VillageProfile>({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      // Fetch statistics
+      const statsResponse = await fetch("/api/statistics")
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setStats(statsData)
+      }
+
+      // Fetch village profile
+      const profileResponse = await fetch("/api/village-profile")
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        setProfile(profileData || {})
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const statisticsData = [
     {
-      title: "Demografi",
+      title: "Jumlah Penduduk",
+      value: profile.population?.toLocaleString("id-ID") || "0",
       icon: Users,
-      data: [
-        { label: "Laki-laki", value: 1623, percentage: 50 },
-        { label: "Perempuan", value: 1624, percentage: 50 },
-        { label: "Usia Produktif", value: 2156, percentage: 66 },
-        { label: "Anak-anak", value: 651, percentage: 20 },
-      ],
+      color: "text-blue-600",
     },
     {
-      title: "Pendidikan",
-      icon: GraduationCap,
-      data: [
-        { label: "SD/Sederajat", value: 1298, percentage: 40 },
-        { label: "SMP/Sederajat", value: 974, percentage: 30 },
-        { label: "SMA/Sederajat", value: 649, percentage: 20 },
-        { label: "Perguruan Tinggi", value: 326, percentage: 10 },
-      ],
+      title: "Jumlah RT",
+      value: profile.rt_count?.toString() || "0",
+      icon: Building,
+      color: "text-green-600",
     },
     {
-      title: "Kesehatan",
-      icon: Heart,
-      data: [
-        { label: "Posyandu Aktif", value: 8, percentage: 100 },
-        { label: "Balita Sehat", value: 234, percentage: 95 },
-        { label: "Lansia Sehat", value: 187, percentage: 85 },
-        { label: "Keluarga Sehat", value: 756, percentage: 92 },
-      ],
+      title: "Jumlah RW",
+      value: profile.rw_count?.toString() || "0",
+      icon: Building,
+      color: "text-purple-600",
     },
     {
-      title: "Ekonomi",
-      icon: Briefcase,
-      data: [
-        { label: "Petani", value: 1298, percentage: 45 },
-        { label: "Pedagang", value: 432, percentage: 15 },
-        { label: "Buruh", value: 649, percentage: 25 },
-        { label: "PNS/Swasta", value: 433, percentage: 15 },
-      ],
+      title: "UMKM Aktif",
+      value: stats.umkm.toString(),
+      icon: Building,
+      color: "text-orange-600",
     },
   ]
 
+  if (loading) {
+    return (
+      <section className="py-16 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Statistik Desa</h2>
+            <p className="text-muted-foreground">Data terkini Desa Kaliwungu</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="text-center">
+                <CardContent className="p-6">
+                  <div className="h-12 w-12 bg-muted rounded-full mx-auto mb-4 animate-pulse" />
+                  <div className="h-8 bg-muted rounded animate-pulse mb-2" />
+                  <div className="h-4 bg-muted rounded animate-pulse" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className="py-16 bg-muted/50">
+    <section className="py-16 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950">
       <div className="container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Data Kependudukan</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Statistik terkini mengenai demografi, pendidikan, kesehatan, dan ekonomi masyarakat Desa Kaliwungu
-          </p>
+          <h2 className="text-3xl font-bold mb-4">Statistik Desa</h2>
+          <p className="text-muted-foreground">Data terkini Desa Kaliwungu</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <stat.icon className="h-5 w-5 text-primary" />
-                  {stat.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {stat.data.map((item, itemIndex) => (
-                  <div key={itemIndex} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>{item.label}</span>
-                      <span className="font-medium">{item.value.toLocaleString()}</span>
-                    </div>
-                    <Progress value={item.percentage} className="h-2" />
+          {statisticsData.map((stat, index) => (
+            <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex justify-center mb-4">
+                  <div className={`p-3 rounded-full bg-muted ${stat.color}`}>
+                    <stat.icon className="h-6 w-6" />
                   </div>
-                ))}
+                </div>
+                <h3 className="text-2xl font-bold mb-2">{stat.value}</h3>
+                <p className="text-muted-foreground">{stat.title}</p>
               </CardContent>
             </Card>
           ))}

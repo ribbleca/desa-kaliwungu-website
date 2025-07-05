@@ -6,11 +6,11 @@ if (!process.env.DATABASE_URL) {
 
 const sql = neon(process.env.DATABASE_URL)
 
-// News functions
+// News functions - MENGGUNAKAN TABEL ADMIN_NEWS YANG SAMA
 export async function getAllNews() {
   try {
     const news = await sql`
-      SELECT * FROM news 
+      SELECT * FROM admin_news 
       ORDER BY created_at DESC
     `
     return news
@@ -23,7 +23,7 @@ export async function getAllNews() {
 export async function getPublishedNews() {
   try {
     const news = await sql`
-      SELECT * FROM news 
+      SELECT * FROM admin_news 
       WHERE published = true 
       ORDER BY created_at DESC
     `
@@ -37,7 +37,7 @@ export async function getPublishedNews() {
 export async function getNewsById(id: number) {
   try {
     const news = await sql`
-      SELECT * FROM news 
+      SELECT * FROM admin_news 
       WHERE id = ${id}
     `
     return news[0] || null
@@ -57,8 +57,8 @@ export async function createNews(data: {
 }) {
   try {
     const result = await sql`
-      INSERT INTO news (title, content, excerpt, image, category, published)
-      VALUES (${data.title}, ${data.content}, ${data.excerpt || ""}, ${data.image || ""}, ${data.category}, ${data.published})
+      INSERT INTO admin_news (title, content, excerpt, image, category, published, author_id)
+      VALUES (${data.title}, ${data.content}, ${data.excerpt || ""}, ${data.image || ""}, ${data.category}, ${data.published}, 1)
       RETURNING *
     `
     return result[0]
@@ -81,7 +81,7 @@ export async function updateNews(
 ) {
   try {
     const result = await sql`
-      UPDATE news 
+      UPDATE admin_news 
       SET title = ${data.title}, 
           content = ${data.content}, 
           excerpt = ${data.excerpt || ""}, 
@@ -101,7 +101,7 @@ export async function updateNews(
 
 export async function deleteNews(id: number) {
   try {
-    await sql`DELETE FROM news WHERE id = ${id}`
+    await sql`DELETE FROM admin_news WHERE id = ${id}`
     return true
   } catch (error) {
     console.error("Error deleting news:", error)
@@ -109,11 +109,11 @@ export async function deleteNews(id: number) {
   }
 }
 
-// UMKM functions
+// UMKM functions - MENGGUNAKAN TABEL ADMIN_UMKM YANG SAMA
 export async function getAllUMKM() {
   try {
     const umkm = await sql`
-      SELECT * FROM umkm 
+      SELECT * FROM admin_umkm 
       ORDER BY created_at DESC
     `
     return umkm
@@ -126,7 +126,7 @@ export async function getAllUMKM() {
 export async function getFeaturedUMKM() {
   try {
     const umkm = await sql`
-      SELECT * FROM umkm 
+      SELECT * FROM admin_umkm 
       WHERE featured = true 
       ORDER BY rating DESC
       LIMIT 8
@@ -141,7 +141,7 @@ export async function getFeaturedUMKM() {
 export async function getUMKMById(id: number) {
   try {
     const umkm = await sql`
-      SELECT * FROM umkm 
+      SELECT * FROM admin_umkm 
       WHERE id = ${id}
     `
     return umkm[0] || null
@@ -164,7 +164,7 @@ export async function createUMKM(data: {
 }) {
   try {
     const result = await sql`
-      INSERT INTO umkm (name, description, category, owner, phone, address, image, rating, featured)
+      INSERT INTO admin_umkm (name, description, category, owner, phone, address, image, rating, featured)
       VALUES (${data.name}, ${data.description}, ${data.category}, ${data.owner}, ${data.phone}, ${data.address}, ${data.image || ""}, ${data.rating || 0}, ${data.featured})
       RETURNING *
     `
@@ -191,7 +191,7 @@ export async function updateUMKM(
 ) {
   try {
     const result = await sql`
-      UPDATE umkm 
+      UPDATE admin_umkm 
       SET name = ${data.name}, 
           description = ${data.description}, 
           category = ${data.category}, 
@@ -214,7 +214,7 @@ export async function updateUMKM(
 
 export async function deleteUMKM(id: number) {
   try {
-    await sql`DELETE FROM umkm WHERE id = ${id}`
+    await sql`DELETE FROM admin_umkm WHERE id = ${id}`
     return true
   } catch (error) {
     console.error("Error deleting UMKM:", error)
@@ -222,11 +222,11 @@ export async function deleteUMKM(id: number) {
   }
 }
 
-// Gallery functions
+// Gallery functions - MENGGUNAKAN TABEL ADMIN_GALLERY YANG SAMA
 export async function getAllGallery() {
   try {
     const gallery = await sql`
-      SELECT * FROM gallery 
+      SELECT * FROM admin_gallery 
       ORDER BY created_at DESC
     `
     return gallery
@@ -244,7 +244,7 @@ export async function createGalleryItem(data: {
 }) {
   try {
     const result = await sql`
-      INSERT INTO gallery (title, description, image, category)
+      INSERT INTO admin_gallery (title, description, image, category)
       VALUES (${data.title}, ${data.description || ""}, ${data.image}, ${data.category})
       RETURNING *
     `
@@ -257,7 +257,7 @@ export async function createGalleryItem(data: {
 
 export async function deleteGalleryItem(id: number) {
   try {
-    await sql`DELETE FROM gallery WHERE id = ${id}`
+    await sql`DELETE FROM admin_gallery WHERE id = ${id}`
     return true
   } catch (error) {
     console.error("Error deleting gallery item:", error)
@@ -265,11 +265,11 @@ export async function deleteGalleryItem(id: number) {
   }
 }
 
-// Agenda functions
+// Agenda functions - MENGGUNAKAN TABEL ADMIN_AGENDA YANG SAMA
 export async function getAllAgenda() {
   try {
     const agenda = await sql`
-      SELECT * FROM agenda 
+      SELECT * FROM admin_agenda 
       ORDER BY event_date ASC
     `
     return agenda
@@ -282,7 +282,7 @@ export async function getAllAgenda() {
 export async function getUpcomingAgenda() {
   try {
     const agenda = await sql`
-      SELECT * FROM agenda 
+      SELECT * FROM admin_agenda 
       WHERE event_date >= CURRENT_DATE 
       ORDER BY event_date ASC
       LIMIT 5
@@ -303,8 +303,8 @@ export async function createAgenda(data: {
 }) {
   try {
     const result = await sql`
-      INSERT INTO agenda (title, description, event_date, location, organizer)
-      VALUES (${data.title}, ${data.description}, ${data.event_date}, ${data.location}, ${data.organizer})
+      INSERT INTO admin_agenda (title, description, event_date, location, organizer, category)
+      VALUES (${data.title}, ${data.description}, ${data.event_date}, ${data.location}, ${data.organizer}, 'umum')
       RETURNING *
     `
     return result[0]
@@ -326,7 +326,7 @@ export async function updateAgenda(
 ) {
   try {
     const result = await sql`
-      UPDATE agenda 
+      UPDATE admin_agenda 
       SET title = ${data.title}, 
           description = ${data.description}, 
           event_date = ${data.event_date}, 
@@ -344,7 +344,7 @@ export async function updateAgenda(
 
 export async function deleteAgenda(id: number) {
   try {
-    await sql`DELETE FROM agenda WHERE id = ${id}`
+    await sql`DELETE FROM admin_agenda WHERE id = ${id}`
     return true
   } catch (error) {
     console.error("Error deleting agenda:", error)
@@ -352,11 +352,11 @@ export async function deleteAgenda(id: number) {
   }
 }
 
-// Village Profile functions
+// Village Profile functions - MENGGUNAKAN TABEL ADMIN_VILLAGE_PROFILE YANG SAMA
 export async function getVillageProfile() {
   try {
     const profile = await sql`
-      SELECT * FROM village_profile 
+      SELECT * FROM admin_village_profile 
       ORDER BY id DESC 
       LIMIT 1
     `
@@ -378,32 +378,43 @@ export async function updateVillageProfile(data: {
   rt_count?: number
 }) {
   try {
-    const result = await sql`
-      UPDATE village_profile 
-      SET vision = ${data.vision || ""}, 
-          mission = ${data.mission || ""}, 
-          history = ${data.history || ""}, 
-          area_size = ${data.area_size || ""}, 
-          population = ${data.population || 0}, 
-          villages_count = ${data.villages_count || 0}, 
-          rw_count = ${data.rw_count || 0}, 
-          rt_count = ${data.rt_count || 0},
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = 1
-      RETURNING *
-    `
-    return result[0]
+    const existing = await getVillageProfile()
+
+    if (existing) {
+      const result = await sql`
+        UPDATE admin_village_profile 
+        SET vision = ${data.vision || ""}, 
+            mission = ${data.mission || ""}, 
+            history = ${data.history || ""}, 
+            area_size = ${data.area_size || ""}, 
+            population = ${data.population || 0}, 
+            villages_count = ${data.villages_count || 0}, 
+            rw_count = ${data.rw_count || 0}, 
+            rt_count = ${data.rt_count || 0},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ${existing.id}
+        RETURNING *
+      `
+      return result[0]
+    } else {
+      const result = await sql`
+        INSERT INTO admin_village_profile (vision, mission, history, area_size, population, villages_count, rw_count, rt_count)
+        VALUES (${data.vision || ""}, ${data.mission || ""}, ${data.history || ""}, ${data.area_size || ""}, ${data.population || 0}, ${data.villages_count || 0}, ${data.rw_count || 0}, ${data.rt_count || 0})
+        RETURNING *
+      `
+      return result[0]
+    }
   } catch (error) {
     console.error("Error updating village profile:", error)
     throw new Error("Failed to update village profile")
   }
 }
 
-// Village Officials functions
+// Village Officials functions - MENGGUNAKAN TABEL ADMIN_VILLAGE_OFFICIALS YANG SAMA
 export async function getAllVillageOfficials() {
   try {
     const officials = await sql`
-      SELECT * FROM village_officials 
+      SELECT * FROM admin_village_officials 
       ORDER BY 
         CASE position 
           WHEN 'Kepala Desa' THEN 1
@@ -428,7 +439,7 @@ export async function createVillageOfficial(data: {
 }) {
   try {
     const result = await sql`
-      INSERT INTO village_officials (name, position, photo, phone, email)
+      INSERT INTO admin_village_officials (name, position, photo, phone, email)
       VALUES (${data.name}, ${data.position}, ${data.photo || ""}, ${data.phone || ""}, ${data.email || ""})
       RETURNING *
     `
@@ -451,7 +462,7 @@ export async function updateVillageOfficial(
 ) {
   try {
     const result = await sql`
-      UPDATE village_officials 
+      UPDATE admin_village_officials 
       SET name = ${data.name}, 
           position = ${data.position}, 
           photo = ${data.photo || ""}, 
@@ -469,7 +480,7 @@ export async function updateVillageOfficial(
 
 export async function deleteVillageOfficial(id: number) {
   try {
-    await sql`DELETE FROM village_officials WHERE id = ${id}`
+    await sql`DELETE FROM admin_village_officials WHERE id = ${id}`
     return true
   } catch (error) {
     console.error("Error deleting village official:", error)
@@ -477,11 +488,11 @@ export async function deleteVillageOfficial(id: number) {
   }
 }
 
-// User authentication functions
+// User authentication functions - MENGGUNAKAN TABEL ADMIN_USERS YANG SAMA
 export async function getUserByEmail(email: string) {
   try {
     const user = await sql`
-      SELECT * FROM users 
+      SELECT * FROM admin_users 
       WHERE email = ${email}
     `
     return user[0] || null
@@ -499,7 +510,7 @@ export async function createUser(data: {
 }) {
   try {
     const result = await sql`
-      INSERT INTO users (email, password, name, role)
+      INSERT INTO admin_users (email, password, name, role)
       VALUES (${data.email}, ${data.password}, ${data.name}, ${data.role || "admin"})
       RETURNING id, email, name, role, created_at
     `
@@ -510,19 +521,19 @@ export async function createUser(data: {
   }
 }
 
-// Statistics functions
+// Statistics functions - MENGGUNAKAN TABEL ADMIN_* YANG SAMA
 export async function getStatistics() {
   try {
-    const newsCount = await sql`SELECT COUNT(*) as count FROM news`
-    const umkmCount = await sql`SELECT COUNT(*) as count FROM umkm`
-    const galleryCount = await sql`SELECT COUNT(*) as count FROM gallery`
-    const agendaCount = await sql`SELECT COUNT(*) as count FROM agenda WHERE event_date >= CURRENT_DATE`
+    const newsCount = await sql`SELECT COUNT(*) as count FROM admin_news WHERE published = true`
+    const umkmCount = await sql`SELECT COUNT(*) as count FROM admin_umkm`
+    const galleryCount = await sql`SELECT COUNT(*) as count FROM admin_gallery`
+    const agendaCount = await sql`SELECT COUNT(*) as count FROM admin_agenda WHERE event_date >= CURRENT_DATE`
 
     return {
-      news: newsCount[0].count,
-      umkm: umkmCount[0].count,
-      gallery: galleryCount[0].count,
-      agenda: agendaCount[0].count,
+      news: Number(newsCount[0].count),
+      umkm: Number(umkmCount[0].count),
+      gallery: Number(galleryCount[0].count),
+      agenda: Number(agendaCount[0].count),
     }
   } catch (error) {
     console.error("Error fetching statistics:", error)

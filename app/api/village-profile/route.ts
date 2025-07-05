@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { getVillageProfile, updateVillageProfile } from "@/lib/database"
 import { verifyToken } from "@/lib/auth"
-import type { NextRequest } from "next/server"
 
 export async function GET() {
   try {

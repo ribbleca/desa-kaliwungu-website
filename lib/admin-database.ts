@@ -92,7 +92,7 @@ export async function authenticateAdmin(email: string, password: string): Promis
   }
 }
 
-// News functions
+// News functions - THESE ARE THE MAIN NEWS FUNCTIONS FOR THE WEBSITE
 export async function getAllAdminNews(): Promise<AdminNews[]> {
   try {
     const news = await sql`
@@ -103,6 +103,20 @@ export async function getAllAdminNews(): Promise<AdminNews[]> {
   } catch (error) {
     console.error("Error fetching admin news:", error)
     throw new Error("Failed to fetch news")
+  }
+}
+
+export async function getPublishedAdminNews(): Promise<AdminNews[]> {
+  try {
+    const news = await sql`
+      SELECT * FROM admin_news 
+      WHERE published = true 
+      ORDER BY created_at DESC
+    `
+    return news as AdminNews[]
+  } catch (error) {
+    console.error("Error fetching published admin news:", error)
+    throw new Error("Failed to fetch published news")
   }
 }
 
@@ -164,7 +178,7 @@ export async function deleteAdminNews(id: number): Promise<boolean> {
   }
 }
 
-// UMKM functions
+// UMKM functions - THESE ARE THE MAIN UMKM FUNCTIONS FOR THE WEBSITE
 export async function getAllAdminUMKM(): Promise<AdminUMKM[]> {
   try {
     const umkm = await sql`
@@ -175,6 +189,21 @@ export async function getAllAdminUMKM(): Promise<AdminUMKM[]> {
   } catch (error) {
     console.error("Error fetching admin UMKM:", error)
     throw new Error("Failed to fetch UMKM")
+  }
+}
+
+export async function getFeaturedAdminUMKM(): Promise<AdminUMKM[]> {
+  try {
+    const umkm = await sql`
+      SELECT * FROM admin_umkm 
+      WHERE featured = true 
+      ORDER BY rating DESC
+      LIMIT 8
+    `
+    return umkm as AdminUMKM[]
+  } catch (error) {
+    console.error("Error fetching featured admin UMKM:", error)
+    throw new Error("Failed to fetch featured UMKM")
   }
 }
 
@@ -226,7 +255,7 @@ export async function deleteAdminUMKM(id: number): Promise<boolean> {
   }
 }
 
-// Village Profile functions
+// Village Profile functions - THESE ARE THE MAIN PROFILE FUNCTIONS FOR THE WEBSITE
 export async function getAdminVillageProfile(): Promise<AdminVillageProfile | null> {
   try {
     const profile = await sql`
@@ -327,6 +356,21 @@ export async function getAllAdminAgenda(): Promise<AdminAgenda[]> {
   } catch (error) {
     console.error("Error fetching admin agenda:", error)
     throw new Error("Failed to fetch agenda")
+  }
+}
+
+export async function getUpcomingAdminAgenda(): Promise<AdminAgenda[]> {
+  try {
+    const agenda = await sql`
+      SELECT * FROM admin_agenda 
+      WHERE event_date >= CURRENT_DATE 
+      ORDER BY event_date ASC
+      LIMIT 5
+    `
+    return agenda as AdminAgenda[]
+  } catch (error) {
+    console.error("Error fetching upcoming admin agenda:", error)
+    throw new Error("Failed to fetch upcoming agenda")
   }
 }
 
