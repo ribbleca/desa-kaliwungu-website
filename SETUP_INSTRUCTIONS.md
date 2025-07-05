@@ -1,138 +1,150 @@
-# 🚀 Setup Instructions - Desa Kaliwungu Website
+# Setup Instructions - Desa Kaliwungu Website
 
-## ✅ **LANGKAH 1: Setup Database di Neon**
+## 🎯 Step 1: Setup Neon Database
 
-### A. Buat Akun Neon
-1. Buka [neon.tech](https://neon.tech)
-2. Klik **"Sign Up"** 
-3. Daftar dengan email/GitHub
-4. Verifikasi email jika diminta
+### A. Create Neon Account & Project
+1. Go to [neon.tech](https://neon.tech)
+2. Sign up with your email
+3. Create new project:
+   - Name: `desa-kaliwungu-db`
+   - Region: `US East (Ohio)`
+4. Click "Create Project"
 
-### B. Buat Database Project
-1. Setelah login, klik **"Create Project"**
-2. Isi form:
-   \`\`\`
-   Project Name: desa-kaliwungu-db
-   Database Name: neondb (default)
-   Region: US East (Ohio) - recommended
-   \`\`\`
-3. Klik **"Create Project"**
-4. Tunggu 30-60 detik sampai selesai
-
-### C. Ambil Connection String
-1. Setelah project dibuat, klik **"Connect"**
-2. Pilih tab **"Pooled connection"**
-3. Copy connection string yang seperti ini:
+### B. Get Connection String
+1. After project creation, click "Connect"
+2. Copy the connection string (looks like):
    \`\`\`
    postgresql://username:password@ep-xxx.us-east-1.neon.tech/neondb?sslmode=require
    \`\`\`
-4. **SIMPAN** connection string ini untuk step berikutnya!
+3. Save this connection string!
 
----
+### C. Run Database Setup
+1. In Neon Console, click "SQL Editor"
+2. Copy entire content from `scripts/setup-neon-database.sql`
+3. Paste in SQL Editor
+4. Click "Run" button
+5. Wait for completion (30-60 seconds)
+6. You should see "Database setup completed successfully!"
 
-## ✅ **LANGKAH 2: Setup Environment Variables di Vercel**
+## 🎯 Step 2: Configure Vercel Environment Variables
 
-### A. Buka Vercel Dashboard
-1. Login ke [vercel.com](https://vercel.com)
-2. Pilih project **"desa-kaliwungu-website"**
-3. Klik tab **"Settings"**
-4. Klik **"Environment Variables"** di sidebar
+### A. Access Vercel Settings
+1. Login to [vercel.com](https://vercel.com)
+2. Select your `desa-kaliwungu-website` project
+3. Click "Settings" tab
+4. Click "Environment Variables" in sidebar
 
-### B. Tambahkan Variables (WAJIB)
+### B. Add Required Variables
 
-**Klik "Add New" untuk setiap variable:**
+Click "Add New" for each variable:
 
-#### 1. DATABASE_URL
+#### 1. DATABASE_URL (Required)
 \`\`\`
 Name: DATABASE_URL
-Value: [paste connection string dari Neon]
-Environment: Production, Preview, Development (centang semua)
+Value: [Your Neon connection string from Step 1B]
+Environment: Production, Preview, Development (select all)
 \`\`\`
 
-#### 2. NEXTAUTH_URL
+#### 2. NEXTAUTH_URL (Required)
 \`\`\`
 Name: NEXTAUTH_URL
-Value: https://[your-vercel-url].vercel.app
+Value: https://your-project-name.vercel.app
 Environment: Production, Preview, Development
 \`\`\`
-*Ganti [your-vercel-url] dengan URL deployment Anda*
+*Replace `your-project-name` with your actual Vercel URL*
 
-#### 3. NEXTAUTH_SECRET
+#### 3. NEXTAUTH_SECRET (Required)
 \`\`\`
 Name: NEXTAUTH_SECRET
-Value: desa-kaliwungu-secret-2024-super-secure-key
+Value: desa-kaliwungu-secret-key-2024-super-secure-random-string
 Environment: Production, Preview, Development
 \`\`\`
 
-#### 4. BLOB_READ_WRITE_TOKEN (Sudah ada)
+#### 4. ADMIN_EMAIL (Optional)
 \`\`\`
-Ini sudah otomatis tersedia dari Vercel
+Name: ADMIN_EMAIL
+Value: admin@desakaliwungu.id
+Environment: Production, Preview, Development
 \`\`\`
 
-### C. Save & Redeploy
-1. Klik **"Save"** untuk setiap variable
-2. Kembali ke tab **"Deployments"**
-3. Klik **titik 3 (...)** di deployment teratas
-4. Klik **"Redeploy"**
+#### 5. ADMIN_PASSWORD (Optional)
+\`\`\`
+Name: ADMIN_PASSWORD
+Value: admin123
+Environment: Production, Preview, Development
+\`\`\`
 
----
+### C. Redeploy
+1. Go to "Deployments" tab
+2. Click "..." on latest deployment
+3. Click "Redeploy"
+4. Wait 2-3 minutes for completion
 
-## ✅ **LANGKAH 3: Setup Database Tables**
+## 🎯 Step 3: Test Your Website
 
-### A. Buka Neon SQL Editor
-1. Login ke [console.neon.tech](https://console.neon.tech)
-2. Pilih project database Anda
-3. Klik **"SQL Editor"** di sidebar kiri
+### A. Check Homepage
+- Visit your Vercel URL
+- Verify all sections load properly
+- Check responsive design on mobile
 
-### B. Jalankan Setup Script
-1. Copy **SELURUH ISI** file `setup-neon-database.sql`
-2. Paste di SQL Editor
-3. Klik **"Run"** (tombol hijau)
-4. Tunggu 30-60 detik
-5. Lihat pesan **"Database setup completed successfully!"**
+### B. Test Database Features
+- Try contact form submission
+- Check if news section loads
+- Verify UMKM section displays
 
----
+### C. Admin Access (Optional)
+- Go to `/admin` page
+- Login with: `admin@desakaliwungu.id` / `admin123`
+- Test admin features
 
-## ✅ **LANGKAH 4: Verifikasi Setup**
+## 🎯 Step 4: Customize Content
 
-### A. Cek Deployment
-1. Tunggu redeploy Vercel selesai (2-3 menit)
-2. Buka URL website Anda
-3. Pastikan tidak ada error 500
+### A. Update Village Information
+1. Login to admin panel
+2. Update village profile, officials
+3. Add real news and UMKM data
+4. Upload actual photos to gallery
 
-### B. Test Fitur
-1. **Homepage** - harus load dengan data
-2. **Berita** - harus menampilkan artikel sample
-3. **Kontak** - form harus bisa submit
-4. **Admin** - `/admin` harus bisa login
+### B. Configure Contact Information
+1. Update contact details in footer
+2. Set up email forwarding if needed
+3. Configure Google Maps integration
 
----
+## 🔧 Troubleshooting
 
-## 🆘 **Troubleshooting**
+### Database Connection Issues
+- Verify DATABASE_URL is correct
+- Check Neon database is active
+- Ensure all environment variables are set
 
-### Error: "No database connection"
-- Pastikan `DATABASE_URL` sudah diset di Vercel
-- Pastikan connection string benar (copy dari Neon)
-- Redeploy setelah set environment variables
+### Build Errors
+- Check all syntax in React components
+- Verify all imports are correct
+- Review Vercel build logs
 
-### Error: "Table doesn't exist"
-- Jalankan ulang script `setup-neon-database.sql`
-- Pastikan script berjalan tanpa error
-- Cek di Neon console apakah tables sudah dibuat
+### Performance Issues
+- Optimize images using Next.js Image component
+- Enable caching for static content
+- Monitor database query performance
 
-### Error: Build failed
-- Cek build logs di Vercel
-- Pastikan semua dependencies terinstall
-- Cek syntax error di code
+## 📞 Support
 
----
+If you encounter issues:
+1. Check Vercel build logs
+2. Review Neon database logs
+3. Test locally with `npm run dev`
+4. Contact support if needed
 
-## 📞 **Butuh Bantuan?**
+## 🎉 Success Checklist
 
-Jika ada masalah, laporkan:
-1. **Screenshot error** (jika ada)
-2. **URL website** Anda
-3. **Step mana** yang bermasalah
-4. **Pesan error** lengkap
+- [ ] Neon database created and configured
+- [ ] All environment variables set in Vercel
+- [ ] Database tables created successfully
+- [ ] Website deploys without errors
+- [ ] Homepage loads completely
+- [ ] Contact form works
+- [ ] Admin panel accessible
+- [ ] Mobile responsive design works
+- [ ] All sections display properly
 
-**Selamat! Website Desa Kaliwungu siap digunakan! 🎉**
+**Congratulations! Your Desa Kaliwungu website is now live! 🚀**
