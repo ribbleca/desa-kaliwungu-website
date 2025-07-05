@@ -1,6 +1,3 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,51 +5,54 @@ import { MapPin, Phone, Star, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
-interface UMKMItem {
-  id: number
-  name: string
-  description: string
-  category: string
-  image?: string
-  rating: number
-  address: string
-  phone: string
-  featured: boolean
-}
-
 export function UMKMSection() {
-  const [umkm, setUmkm] = useState<UMKMItem[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchUMKM()
-  }, [])
-
-  const fetchUMKM = async () => {
-    try {
-      const response = await fetch("/api/umkm?featured=true")
-      if (response.ok) {
-        const data = await response.json()
-        setUmkm(data.slice(0, 4)) // Show only 4 featured UMKM
-      }
-    } catch (error) {
-      console.error("Error fetching UMKM:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <section className="py-16 bg-muted/50">
-        <div className="container">
-          <div className="text-center">
-            <div className="animate-pulse">Loading UMKM...</div>
-          </div>
-        </div>
-      </section>
-    )
-  }
+  const umkm = [
+    {
+      id: 1,
+      name: "Keripik Singkong Bu Tini",
+      description:
+        "Keripik singkong renyah dengan berbagai varian rasa. Dibuat dari singkong pilihan dengan resep turun temurun.",
+      category: "Makanan & Minuman",
+      image: "/placeholder.svg?height=200&width=300",
+      rating: 4.8,
+      address: "Dusun Kaliwungu Lor",
+      phone: "081234567890",
+      featured: true,
+    },
+    {
+      id: 2,
+      name: "Anyaman Bambu Pak Karno",
+      description: "Kerajinan anyaman bambu berkualitas tinggi. Menerima pesanan berbagai macam produk anyaman.",
+      category: "Kerajinan",
+      image: "/placeholder.svg?height=200&width=300",
+      rating: 4.9,
+      address: "Dusun Kaliwungu Kidul",
+      phone: "081234567891",
+      featured: true,
+    },
+    {
+      id: 3,
+      name: "Batik Tulis Kaliwungu",
+      description: "Batik tulis dengan motif khas Kaliwungu. Menggunakan pewarna alami dan teknik tradisional.",
+      category: "Fashion",
+      image: "/placeholder.svg?height=200&width=300",
+      rating: 4.7,
+      address: "Dusun Tegalsari",
+      phone: "081234567892",
+      featured: false,
+    },
+    {
+      id: 4,
+      name: "Warung Gudeg Bu Sari",
+      description: "Gudeg khas Yogya dengan cita rasa autentik dan bumbu tradisional yang kaya rempah.",
+      category: "Makanan & Minuman",
+      image: "/placeholder.svg?height=200&width=300",
+      rating: 4.6,
+      address: "Dusun Wangon",
+      phone: "081234567893",
+      featured: false,
+    },
+  ]
 
   return (
     <section className="py-16 bg-muted/50">
@@ -74,12 +74,7 @@ export function UMKMSection() {
           {umkm.map((item) => (
             <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative h-48">
-                <Image
-                  src={item.image || "/placeholder.svg?height=200&width=300"}
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
                 {item.featured && <Badge className="absolute top-4 left-4 bg-yellow-500">Unggulan</Badge>}
                 <div className="absolute top-4 right-4 bg-white/90 rounded-full px-2 py-1 flex items-center gap-1">
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -111,12 +106,6 @@ export function UMKMSection() {
             </Card>
           ))}
         </div>
-
-        {umkm.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Belum ada UMKM yang terdaftar.</p>
-          </div>
-        )}
       </div>
     </section>
   )

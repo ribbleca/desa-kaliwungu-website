@@ -1,14 +1,13 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { MapPin, Phone, Mail, Clock } from "lucide-react"
-import { MapComponent } from "@/components/map-component"
-import { useToast } from "@/hooks/use-toast"
-import type { FormEvent } from "react"
 
 export function ContactSection() {
   const [formData, setFormData] = useState({
@@ -19,55 +18,23 @@ export function ContactSection() {
     message: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Error",
-        description: "Nama, email, dan pesan wajib diisi",
-        variant: "destructive",
-      })
-      return
-    }
-
     setIsSubmitting(true)
 
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+    // Simulate form submission
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      if (response.ok) {
-        toast({
-          title: "Berhasil",
-          description: "Pesan Anda telah terkirim. Kami akan segera merespons.",
-        })
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          subject: "",
-          message: "",
-        })
-      } else {
-        throw new Error("Failed to send message")
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Gagal mengirim pesan. Silakan coba lagi.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    alert("Pesan berhasil dikirim!")
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    })
+    setIsSubmitting(false)
   }
 
   return (
@@ -197,15 +164,6 @@ export function ContactSection() {
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Map */}
-        <div className="mt-12">
-          <div className="mb-4">
-            <h3 className="text-xl font-semibold">Lokasi Desa</h3>
-            <p className="text-muted-foreground">Desa Kaliwungu, Kecamatan Sidareja, Kabupaten Cilacap</p>
-          </div>
-          <MapComponent />
         </div>
       </div>
     </section>

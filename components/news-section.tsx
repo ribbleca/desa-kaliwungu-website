@@ -1,6 +1,3 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,48 +5,34 @@ import { Calendar, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
-interface NewsItem {
-  id: number
-  title: string
-  excerpt: string
-  image?: string
-  category: string
-  created_at: string
-}
-
 export function NewsSection() {
-  const [news, setNews] = useState<NewsItem[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchNews()
-  }, [])
-
-  const fetchNews = async () => {
-    try {
-      const response = await fetch("/api/news?published=true")
-      if (response.ok) {
-        const data = await response.json()
-        setNews(data.slice(0, 3)) // Show only 3 latest news
-      }
-    } catch (error) {
-      console.error("Error fetching news:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <section className="py-16">
-        <div className="container">
-          <div className="text-center">
-            <div className="animate-pulse">Loading berita...</div>
-          </div>
-        </div>
-      </section>
-    )
-  }
+  const news = [
+    {
+      id: 1,
+      title: "Pembangunan Jalan Desa Tahap II Dimulai",
+      excerpt:
+        "Pemerintah desa memulai pembangunan jalan desa tahap kedua untuk meningkatkan akses transportasi warga.",
+      image: "/placeholder.svg?height=200&width=300",
+      category: "Pembangunan",
+      date: "2024-01-15",
+    },
+    {
+      id: 2,
+      title: "Festival UMKM Desa Kaliwungu 2024",
+      excerpt: "Acara tahunan untuk mempromosikan produk-produk UMKM lokal dan meningkatkan ekonomi desa.",
+      image: "/placeholder.svg?height=200&width=300",
+      category: "Ekonomi",
+      date: "2024-01-12",
+    },
+    {
+      id: 3,
+      title: "Program Posyandu Balita Berjalan Lancar",
+      excerpt: "Program Posyandu balita mencatat tingkat partisipasi masyarakat yang tinggi.",
+      image: "/placeholder.svg?height=200&width=300",
+      category: "Kesehatan",
+      date: "2024-01-10",
+    },
+  ]
 
   return (
     <section className="py-16">
@@ -71,12 +54,7 @@ export function NewsSection() {
           {news.map((item) => (
             <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative h-48">
-                <Image
-                  src={item.image || "/placeholder.svg?height=200&width=300"}
-                  alt={item.title}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={item.image || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
                 <Badge className="absolute top-4 left-4">{item.category}</Badge>
               </div>
               <CardHeader>
@@ -84,7 +62,7 @@ export function NewsSection() {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    {new Date(item.created_at).toLocaleDateString("id-ID")}
+                    {new Date(item.date).toLocaleDateString("id-ID")}
                   </div>
                 </div>
               </CardHeader>
@@ -97,12 +75,6 @@ export function NewsSection() {
             </Card>
           ))}
         </div>
-
-        {news.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Belum ada berita yang dipublikasikan.</p>
-          </div>
-        )}
       </div>
     </section>
   )
