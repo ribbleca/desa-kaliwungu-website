@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cara Deploy Website Desa Kaliwungu - Panduan Lengkap</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+            padding-left: 15px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        .step h3 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        .code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Cara Deploy Website Desa Kaliwungu</h1>
+        <p style="text-align: center; font-size: 18px; color: #7f8c8d;">
+            Panduan lengkap step-by-step untuk deploy website desa Anda dalam 10 menit!
+        </p>
+
+        <div class="success">
+            <strong>✅ Yang Akan Anda Dapatkan:</strong>
+            <ul>
+                <li>Website desa yang profesional dan responsive</li>
+                <li>Admin panel untuk kelola konten</li>
+                <li>Database cloud gratis</li>
+                <li>Hosting gratis dengan SSL</li>
+                <li>Form kontak yang berfungsi</li>
+            </ul>
+        </div>
+
+        <h2>📋 Persiapan (Yang Anda Butuhkan)</h2>
+        <div class="step">
+            <ul>
+                <li>✅ Akun GitHub (gratis) - <a href="https://github.com" target="_blank">Daftar di sini</a></li>
+                <li>✅ Akun Vercel (gratis) - <a href="https://vercel.com" target="_blank">Daftar di sini</a></li>
+                <li>✅ Akun Neon (database gratis) - <a href="https://neon.tech" target="_blank">Daftar di sini</a></li>
+                <li>✅ Koneksi internet yang stabil</li>
+                <li>✅ Browser (Chrome/Firefox/Safari)</li>
+            </ul>
+        </div>
+
+        <h2>🎯 Langkah 1: Setup Database (5 menit)</h2>
+        <div class="step">
+            <h3>A. Buat Database di Neon</h3>
+            <ol>
+                <li>Buka <a href="https://neon.tech" target="_blank">neon.tech</a></li>
+                <li>Klik <strong>"Sign Up"</strong> dan daftar dengan email</li>
+                <li>Verifikasi email yang masuk</li>
+                <li>Login ke dashboard Neon</li>
+                <li>Klik <strong>"Create Project"</strong></li>
+                <li>Nama project: <code>desa-kaliwungu</code></li>
+                <li>Pilih region: <strong>US East (Ohio)</strong></li>
+                <li>Klik <strong>"Create Project"</strong></li>
+            </ol>
+
+            <h3>B. Ambil Connection String</h3>
+            <ol>
+                <li>Setelah project dibuat, klik <strong>"Connect"</strong></li>
+                <li>Copy seluruh connection string yang seperti ini:</li>
+            </ol>
+            <div class="code">
+postgresql://username:password@ep-xxx.us-east-1.neon.tech/neondb?sslmode=require
+            </div>
+            <div class="warning">
+                <strong>⚠️ PENTING:</strong> Simpan connection string ini di notepad! Kita butuh nanti.
+            </div>
+        </div>
+
+        <h2>🎯 Langkah 2: Deploy ke Vercel (3 menit)</h2>
+        <div class="step">
+            <h3>A. Import dari GitHub</h3>
+            <ol>
+                <li>Buka <a href="https://vercel.com" target="_blank">vercel.com</a></li>
+                <li>Klik <strong>"Sign Up"</strong> → <strong>"Continue with GitHub"</strong></li>
+                <li>Login dengan akun GitHub Anda</li>
+                <li>Di dashboard Vercel, klik <strong>"Add New"</strong> → <strong>"Project"</strong></li>
+                <li>Cari repository <code>desa-kaliwungu-website</code></li>
+                <li>Klik <strong>"Import"</strong></li>
+                <li>Klik <strong>"Deploy"</strong> (biarkan setting default)</li>
+                <li>Tunggu deploy selesai (2-3 menit)</li>
+            </ol>
+        </div>
+
+        <h2>🎯 Langkah 3: Setup Environment Variables (2 menit)</h2>
+        <div class="step">
+            <h3>A. Buka Settings</h3>
+            <ol>
+                <li>Setelah deploy selesai, klik <strong>"Settings"</strong> di tab atas</li>
+                <li>Klik <strong>"Environment Variables"</strong> di sidebar kiri</li>
+            </ol>
+
+            <h3>B. Tambahkan Variables</h3>
+            <p>Klik <strong>"Add"</strong> dan masukkan satu per satu:</p>
+            
+            <div class="code">
+Name: DATABASE_URL
+Value: (paste connection string dari Neon)
+Environment: Production, Preview, Development
+            </div>
+
+            <div class="code">
+Name: NEXTAUTH_SECRET
+Value: desa-kaliwungu-secret-key-2024
+Environment: Production, Preview, Development
+            </div>
+
+            <div class="code">
+Name: NEXTAUTH_URL
+Value: https://your-app-name.vercel.app
+Environment: Production, Preview, Development
+            </div>
+
+            <div class="warning">
+                <strong>📝 Catatan:</strong> Ganti <code>your-app-name</code> dengan nama aplikasi Vercel Anda yang sebenarnya.
+            </div>
+
+            <h3>C. Redeploy</h3>
+            <ol>
+                <li>Klik <strong>"Deployments"</strong> di tab atas</li>
+                <li>Klik titik 3 (...) di deployment teratas</li>
+                <li>Klik <strong>"Redeploy"</strong></li>
+                <li>Tunggu redeploy selesai</li>
+            </ol>
+        </div>
+
+        <h2>🎯 Langkah 4: Inisialisasi Database (1 menit)</h2>
+        <div class="step">
+            <h3>A. Buka SQL Editor Neon</h3>
+            <ol>
+                <li>Kembali ke <a href="https://console.neon.tech" target="_blank">console.neon.tech</a></li>
+                <li>Klik project <strong>"desa-kaliwungu"</strong> Anda</li>
+                <li>Klik <strong>"SQL Editor"</strong> di sidebar kiri</li>
+            </ol>
+
+            <h3>B. Jalankan Script</h3>
+            <ol>
+                <li>Copy seluruh isi file <code>scripts/run-init-production.sql</code> dari project</li>
+                <li>Paste di SQL Editor Neon</li>
+                <li>Klik <strong>"Run"</strong></li>
+                <li>Tunggu sampai selesai (30 detik)</li>
+                <li>Anda akan melihat pesan sukses dan data tabel</li>
+            </ol>
+        </div>
+
+        <h2>🎯 Langkah 5: Test Website (1 menit)</h2>
+        <div class="step">
+            <h3>A. Buka Website</h3>
+            <ol>
+                <li>Kembali ke dashboard Vercel</li>
+                <li>Klik <strong>"Visit"</strong> untuk membuka website</li>
+                <li>Website sudah jalan dengan data sample!</li>
+            </ol>
+
+            <h3>B. Test Admin Panel</h3>
+            <ol>
+                <li>Buka: <code>https://your-website.vercel.app/admin</code></li>
+                <li>Login dengan:</li>
+            </ol>
+            <div class="code">
+Email: admin@desakaliwungu.id
+Password: admin123
+            </div>
+            <p>Sekarang Anda bisa kelola berita, UMKM, galeri, dan lainnya!</p>
+        </div>
+
+        <div class="success">
+            <h2>🎉 SELESAI! Website Anda Sudah Live!</h2>
+            <p><strong>Yang sudah berfungsi:</strong></p>
+            <ul>
+                <li>✅ Website publik dengan data sample</li>
+                <li>✅ Admin panel untuk kelola konten</li>
+                <li>✅ Database PostgreSQL di cloud</li>
+                <li>✅ Hosting gratis dengan SSL</li>
+                <li>✅ Responsive design untuk mobile</li>
+            </ul>
+        </div>
+
+        <h2>🛠️ Langkah Selanjutnya</h2>
+        <div class="step">
+            <ol>
+                <li><strong>Ganti Password Admin</strong> - Login dan ganti password default</li>
+                <li><strong>Edit Profil Desa</strong> - Sesuaikan dengan data desa Anda</li>
+                <li><strong>Tambah Berita Real</strong> - Hapus sample, tambah berita asli</li>
+                <li><strong>Input Data UMKM</strong> - Masukkan data UMKM yang sebenarnya</li>
+                <li><strong>Upload Foto</strong> - Tambahkan foto-foto kegiatan desa</li>
+                <li><strong>Customize Design</strong> - Sesuaikan warna dan logo</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <h3>🆘 Butuh Bantuan?</h3>
+            <p>Jika ada yang tidak jalan atau error:</p>
+            <ul>
+                <li>Cek kembali environment variables di Vercel</li>
+                <li>Pastikan database script sudah dijalankan</li>
+                <li>Screenshot error dan hubungi developer</li>
+                <li>Cek deployment logs di Vercel untuk error detail</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #ecf0f1; border-radius: 10px;">
+            <h3>🎯 WEBSITE DESA KALIWUNGU ANDA SUDAH SIAP!</h3>
+            <p>Selamat! Anda telah berhasil membuat website desa yang profesional dan modern.</p>
+            <a href="#" class="btn">🌐 Buka Website</a>
+            <a href="#" class="btn">🔐 Admin Panel</a>
+        </div>
+    </div>
+</body>
+</html>
